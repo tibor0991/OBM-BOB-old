@@ -22,8 +22,8 @@ RTCDaemon::RTCDaemon()
 {
 	Serial.println("RTCDaemon started");
 	Wire.begin();
-	rtc.begin();
-	rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+	_rtc.begin();
+	_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 }
 
 void RTCDaemon::_run()
