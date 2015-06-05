@@ -20,6 +20,7 @@
 #define RTC_D_H
 
 #include <Arduino.h>
+#include <Wire.h>
 #include <RTClib.h>
 #include "Daemon.h"
 
