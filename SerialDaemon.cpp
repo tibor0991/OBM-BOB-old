@@ -21,7 +21,11 @@
 
 SerialDaemon::SerialDaemon()
 {
-	Serial.begin(9600);
+	//(Serial.begin(9600);
+}
+
+void SerialDaemon::setup()
+{
 	Serial.println("SerialDaemon started.");
 }
 
@@ -37,7 +41,8 @@ void SerialDaemon::_execute(const Message& msg)
 	Serial.print(":");
 	for (byte i=0; i<MESSAGE_SIZE; i++)
 	{
-		Serial.print(msg.data[i], HEX);
+		Serial.print(msg.data[i], DEC);
+                Serial.print("-");
 	}
 	Serial.println();
 }

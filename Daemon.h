@@ -39,6 +39,7 @@ class Daemon
 {
     public:
         Daemon();
+        virtual void setup() = 0;
         void step();
         void receiveMessage(const Message& msg);
     protected:

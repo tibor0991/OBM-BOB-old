@@ -36,8 +36,18 @@ RTCDaemon rtc_d;
 
 void setup()
 {
-	daemons[RTC_D] = &rtc_d;
-	daemons[SERIAL_D] = &serial_d;
+  //starts the serial interface
+  Serial.begin(9600);
+  Serial.println("Open Bio Medical - B.O.B.");
+  Serial.println("Starting system...");
+  Serial.println("Loading daemons...");
+  daemons[RTC_D] = &rtc_d;
+  daemons[SERIAL_D] = &serial_d;
+  
+  Serial.println("Starting Daemons...");
+  for (byte i =0; i<DAEMON_COUNT; i++)
+    daemons[i]->setup();
+  Serial.println("======System ready======");
 }
 
 void loop()

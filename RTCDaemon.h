@@ -28,12 +28,14 @@ class RTCDaemon : public Daemon
 {
 	public:
 		RTCDaemon();
+                virtual void setup();
 	protected:
 		virtual void _run();
         virtual void _execute(const Message& msg);
 	private:
 		RTC_DS1307 _rtc;
-		int previousTime = 0;
+		unsigned long int previousTime = 0; 
+                //if we use a standard int, it quickly overflows
 };
 
 #endif RTC_D_H

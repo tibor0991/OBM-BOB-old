@@ -20,7 +20,8 @@
 
 MessageQueue::MessageQueue() : _qIndex(0), _qHead(0)
 {
-
+    for (byte i=0; i<MAX_QUEUE_SIZE; i++)
+      _array[i] = nullMessage;
 }
 
 void MessageQueue::enqueue(const Message& msg)

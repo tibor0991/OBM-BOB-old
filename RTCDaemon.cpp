@@ -20,10 +20,14 @@
 
 RTCDaemon::RTCDaemon()
 {
-	Serial.println("RTCDaemon started");
-	Wire.begin();
+	/*Wire.begin();
 	_rtc.begin();
-	_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+	_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));*/
+}
+
+void RTCDaemon::setup()
+{
+  Serial.println("RTCDaemon started");
 }
 
 void RTCDaemon::_run()
@@ -33,7 +37,9 @@ void RTCDaemon::_run()
 	{
 		previousTime = millis();
 		byte dataArray[MESSAGE_SIZE];
-		dataArray[0] = _rtc.now().second();
+                for (byte i=0; i<MESSAGE_SIZE; i++) dataArray[i] = 0;
+		//dataArray[0] = _rtc.now().second();
+                dataArray[0] = previousTime / 1000.0;
 		sendMessage(0, dataArray);
 	}
 	

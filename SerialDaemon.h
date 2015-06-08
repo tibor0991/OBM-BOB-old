@@ -30,6 +30,7 @@ class SerialDaemon : public Daemon
 {
 	public:
 		SerialDaemon();
+                virtual void setup();
 	protected:
 		virtual void _run();
         virtual void _execute(const Message& msg);
