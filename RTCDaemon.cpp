@@ -20,30 +20,35 @@
 
 RTCDaemon::RTCDaemon()
 {
-	/*Wire.begin();
-	_rtc.begin();
-	_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));*/
+
 }
 
 void RTCDaemon::setup()
 {
   Serial.println("RTCDaemon started");
+	_rtc.begin();
+	if (_rtc.isrunning()) 
+          _rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+        else 
+          Serial.println("ERROR: Unable to find a RTC device!");
 }
 
 void RTCDaemon::_run()
 {
-	//for testing purposes, rtc_d sends the seconds number each 5 secs
-	if (millis() - previousTime >= 5000)
-	{
-		previousTime = millis();
-		byte dataArray[MESSAGE_SIZE];
-                for (byte i=0; i<MESSAGE_SIZE; i++) dataArray[i] = 0;
-		//dataArray[0] = _rtc.now().second();
-                dataArray[0] = previousTime / 1000.0;
-		sendMessage(0, dataArray);
-	}
-	
-	//it will only reply to time requests in the next release
+        if (_rtc.isrunning())
+        {
+                //for testing purposes, rtc_d sends the seconds number each 5 secs
+        	if (millis() - previousTime >= 5000)
+        	{
+        		previousTime += 5000;
+        		byte dataArray[MESSAGE_SIZE];
+                        for (byte i=0; i<MESSAGE_SIZE; i++) dataArray[i] = 0;
+        		dataArray[0] = _rtc.now().second();
+                        //dataArray[0] = previousTime / 1000.0;
+        		sendMessage(0, dataArray);
+        	}
+        	//it will only reply to time requests in the next release
+        }
 }
 
 void RTCDaemon::_execute(const Message& msg)

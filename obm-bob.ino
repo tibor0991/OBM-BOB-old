@@ -38,8 +38,12 @@ void setup()
 {
   //starts the serial interface
   Serial.begin(9600);
+  //starts the I2C/Wire interface
+  Wire.begin();
+  
+  //Startup
   Serial.println("Open Bio Medical - B.O.B.");
-  Serial.println("Starting system...");
+  Serial.println("======INIT======");
   Serial.println("Loading daemons...");
   daemons[RTC_D] = &rtc_d;
   daemons[SERIAL_D] = &serial_d;
@@ -47,7 +51,7 @@ void setup()
   Serial.println("Starting Daemons...");
   for (byte i =0; i<DAEMON_COUNT; i++)
     daemons[i]->setup();
-  Serial.println("======System ready======");
+  Serial.println("======READY======");
 }
 
 void loop()

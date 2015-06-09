@@ -31,7 +31,7 @@ class RTCDaemon : public Daemon
                 virtual void setup();
 	protected:
 		virtual void _run();
-        virtual void _execute(const Message& msg);
+                virtual void _execute(const Message& msg);
 	private:
 		RTC_DS1307 _rtc;
 		unsigned long int previousTime = 0; 
