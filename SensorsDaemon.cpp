@@ -19,6 +19,8 @@
 
 #include "SensorsDaemon.h"
 
+
+//sensors are connected to digital pins 2,3,4
 DHT SensorsDaemon::sensor1(SENS1_PIN, DHT22);
 DHT SensorsDaemon::sensor2(SENS2_PIN, DHT22);
 DHT SensorsDaemon::sensor3(SENS3_PIN, DHT22);
@@ -67,13 +69,13 @@ void SensorsDaemon::_run()
 		_previousTime += SENSOR_INTERVAL;
 		
 		
-		if(1/*sensors[_currentSensor]->read()*/)
+		if(sensors[_currentSensor]->read())
 		{
 			//calculate temp sum
-			_tempAvg += 36.5; //sensors[_currentSensor]->readTemperature();
+			_tempAvg += sensors[_currentSensor]->readTemperature();
 		
 			//calculate hum sum
-			_humAvg += 20.0; //sensors[_currentSensor]->readHumidity();	
+			_humAvg += sensors[_currentSensor]->readHumidity();	
 		}
 		else 
 		{
@@ -106,7 +108,7 @@ void SensorsDaemon::_run()
 			pushMessageData(int_part);
 			pushMessageData(dec_part);
 			
-			_humAvg /= 3.0;
+			_humAvg /= SENS_N;
 			int_part = _humAvg;
 			dec_part = (_humAvg - int_part) * 10;
 			
