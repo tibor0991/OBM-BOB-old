@@ -18,7 +18,7 @@
 */
 #include "Daemon.h"
 
-byte Daemon::_daemonCounter = 0;
+Message Daemon::_outMsg = nullMessage;
 
 MessageQueue& getMessageBus()
 {
@@ -26,11 +26,12 @@ MessageQueue& getMessageBus()
     return messageBus;
 }
 
-Daemon::Daemon()
+Daemon::Daemon(byte ID)
 {
     //ctor
-    _daemonID = _daemonCounter++;
+    _daemonID = ID;
     _daemonState = D_RUNNING;
+	_dataIndex = 0;
 }
 
 void Daemon::step()
@@ -59,13 +60,23 @@ void Daemon::step()
  }
 
  
- void Daemon::sendMessage(const byte& targetID, const byte* dataArray)
+ void Daemon::sendMessage(const byte targetID)
  {
-	Message toSend;
-	toSend.senderID = _daemonID;
-	toSend.receiverID = targetID;
-	if (dataArray != NULL)
-		for (byte i = 0; i < MESSAGE_SIZE; i++) 
-			toSend.data[i] = dataArray[i];
-	getMessageBus().enqueue(toSend);
+	_outMsg.senderID = _daemonID;
+	_outMsg.receiverID = targetID;
+	getMessageBus().enqueue(_outMsg);
+ }
+ 
+ void Daemon::clearMessageData()
+ {
+	//clears the message
+	for (_dataIndex = 0; _dataIndex < MESSAGE_SIZE; _dataIndex++)
+		_outMsg.data[_dataIndex] = 0;
+	_dataIndex = 0;
+ }
+ 
+ void Daemon::pushMessageData(byte data)
+ {
+	if (_dataIndex < MESSAGE_SIZE)
+		_outMsg.data[_dataIndex++] = data;
  }

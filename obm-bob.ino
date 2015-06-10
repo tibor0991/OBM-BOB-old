@@ -20,6 +20,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <RTClib.h>
+#include <DHT.h>
 
 #include "Message.h"
 #include "MessageQueue.h"
@@ -27,11 +28,20 @@
 
 #include "Daemons.h"
 
+#include "SerialDaemon.h"
+#include "RTCDaemon.h"
+#include "SensorsDaemon.h"
+#include "MenuDaemon.h"
+#include "InputDaemon.h"
+
 byte _daemonCounter = 0;
 Daemon* daemons[DAEMON_COUNT];
 
-SerialDaemon serial_d;
-RTCDaemon rtc_d;
+SerialDaemon serial_d(SERIAL_D);
+RTCDaemon rtc_d(RTC_D);
+SensorsDaemon sensors_d(SENSORS_D);
+MenuDaemon menu_d(MENU_D);
+InputDaemon input_d(INPUT_D);
 
 
 void setup()
@@ -47,6 +57,9 @@ void setup()
   Serial.println("Loading daemons...");
   daemons[RTC_D] = &rtc_d;
   daemons[SERIAL_D] = &serial_d;
+  daemons[SENSORS_D] = &sensors_d;
+  daemons[MENU_D] = &menu_d;
+  daemons[INPUT_D] = &input_d;
   
   Serial.println("Starting Daemons...");
   for (byte i =0; i<DAEMON_COUNT; i++)
@@ -58,7 +71,7 @@ void loop()
 {
     //execute the current daemon
     daemons[_daemonCounter]->step();
-    _daemonCounter = (++_daemonCounter) % 2;
+    _daemonCounter = (++_daemonCounter) % DAEMON_COUNT;
     //dispatcher sends messages from the message queue to the daemons
     //std::cout << "Dispatching phase...\n";
     while (!getMessageBus().isEmpty())

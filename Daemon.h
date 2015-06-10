@@ -31,6 +31,8 @@ The main features of a Daemon are:
 
 #include "MessageQueue.h"
 
+#include "Daemons.h"
+
 MessageQueue& getMessageBus();
 
 enum DaemonState {D_WAITING, D_RUNNING, D_EXECUTING};
@@ -38,7 +40,7 @@ enum DaemonState {D_WAITING, D_RUNNING, D_EXECUTING};
 class Daemon
 {
     public:
-        Daemon();
+        Daemon(byte ID);
         virtual void setup() = 0;
         void step();
         void receiveMessage(const Message& msg);
@@ -46,12 +48,14 @@ class Daemon
         virtual void _run() = 0;
         virtual void _execute(const Message& msg) = 0;
         MessageQueue _inbox;
-		void sendMessage(const byte& targetID, const byte* dataArray);
-    private:
+		void sendMessage(const byte targetID);
+		void pushMessageData(byte data);
+		void clearMessageData();
+	private:
 		byte _daemonID;
-        static byte _daemonCounter;
 		DaemonState _daemonState;
-		
+		static Message _outMsg;
+		byte _dataIndex;
 };
 
 #endif // DAEMON_H

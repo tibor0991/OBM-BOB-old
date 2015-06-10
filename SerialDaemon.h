@@ -29,8 +29,8 @@ On start, it opens a serial connection; afterwards it keeps on listening.
 class SerialDaemon : public Daemon
 {
 	public:
-		SerialDaemon();
-                virtual void setup();
+		SerialDaemon(byte ID) : Daemon(ID){}
+        virtual void setup();
 	protected:
 		virtual void _run();
         virtual void _execute(const Message& msg);

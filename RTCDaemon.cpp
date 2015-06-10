@@ -18,40 +18,34 @@
 */
 #include "RTCDaemon.h"
 
-RTCDaemon::RTCDaemon()
-{
-
-}
-
 void RTCDaemon::setup()
 {
   Serial.println("RTCDaemon started");
 	_rtc.begin();
 	if (_rtc.isrunning()) 
-          _rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-        else 
-          Serial.println("ERROR: Unable to find a RTC device!");
+		_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+	else 
+		Serial.println("ERROR: Unable to find a RTC device!");
 }
 
 void RTCDaemon::_run()
 {
-        if (_rtc.isrunning())
-        {
-                //for testing purposes, rtc_d sends the seconds number each 5 secs
-        	if (millis() - previousTime >= 5000)
-        	{
-        		previousTime += 5000;
-        		byte dataArray[MESSAGE_SIZE];
-                        for (byte i=0; i<MESSAGE_SIZE; i++) dataArray[i] = 0;
-        		dataArray[0] = _rtc.now().second();
-                        //dataArray[0] = previousTime / 1000.0;
-        		sendMessage(0, dataArray);
-        	}
-        	//it will only reply to time requests in the next release
-        }
+
 }
 
 void RTCDaemon::_execute(const Message& msg)
 {
-
+	if (_rtc.isrunning())
+	{
+		//if it's running, process the message and send it back to the sender
+		DateTime now = _rtc.now();
+		pushMessageData(now.day());
+		pushMessageData(now.month());
+		pushMessageData(now.year());
+		pushMessageData(now.hour());
+		pushMessageData(now.minute());
+		pushMessageData(now.second());
+		sendMessage(msg.senderID);
+		clearMessageData(); //always call this after sending a message
+	}
 }

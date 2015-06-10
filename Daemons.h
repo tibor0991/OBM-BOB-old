@@ -19,9 +19,6 @@
 #ifndef DAEMONS_H
 #define DAEMONS_H
 
-#include "SerialDaemon.h"
-#include "RTCDaemon.h"
-
-enum DaemonName { SERIAL_D = 0, RTC_D, DAEMON_COUNT};
+enum DaemonName { SERIAL_D = 0, RTC_D, SENSORS_D, MENU_D, INPUT_D, DAEMON_COUNT};
 
 #endif DAEMONS_H
