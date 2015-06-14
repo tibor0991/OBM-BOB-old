@@ -16,11 +16,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//including main Arduino liraries here, otherwise it complains -.-
+//including main Arduino liraries here, otherwise the compiler complains -.-
 #include <Arduino.h>
 #include <Wire.h>
 #include <RTClib.h>
 #include <DHT.h>
+#include <SoftwareSerial.h>
 
 #include "Message.h"
 #include "MessageQueue.h"
