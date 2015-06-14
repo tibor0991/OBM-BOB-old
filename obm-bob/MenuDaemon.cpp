@@ -54,21 +54,10 @@ void MenuDaemon::_run()
 		case IDLE_SCREEN1:
 			//prints the first idle page
 			
-			//printing to USB serial 
-			Serial.print("TEMP: ");
-			Serial.print(_tempInt, DEC);
-			Serial.print(".");
-			Serial.print(_tempDec, DEC);
-			Serial.println();
-			Serial.print("HUM : ");
-			Serial.print(_humInt, DEC);
-			Serial.print(".");
-			Serial.print(_humDec, DEC);
-			Serial.println();
-			
 			//change the data on the display ONLY IF a change in data happened
 			if (_dataChanged)
 			{
+				display_s.write(12);
 				//	                       111111
 				//				 0123456789012345
 				display_s.print(" DATE GOES HERE ");
@@ -89,6 +78,18 @@ void MenuDaemon::_run()
 				display_s.print(_humDec, DEC);
 				
 				_dataChanged = 0;
+				
+				//printing to USB serial 
+				Serial.print("TEMP: ");
+				Serial.print(_tempInt, DEC);
+				Serial.print(".");
+				Serial.print(_tempDec, DEC);
+				Serial.println();
+				Serial.print("HUM : ");
+				Serial.print(_humInt, DEC);
+				Serial.print(".");
+				Serial.print(_humDec, DEC);
+				Serial.println();
 			}
 			
 			
