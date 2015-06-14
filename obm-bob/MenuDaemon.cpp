@@ -25,13 +25,7 @@ void MenuDaemon::setup()
 {
 	Serial.println("Starting InputDaemon...");
 	
-	//setting up the software serial for the parallax display
-	pinMode(DISPLAY_PIN, OUTPUT);
-	digitalWrite(DISPLAY_PIN, HIGH);
-	display_s.begin(9600);
-	delay(100);
-	display_s.write(12);
-	display_s.write(17);
+	Serial.write(17);
 	delay(5);
 	
 	_dataChanged = 0;
@@ -57,39 +51,27 @@ void MenuDaemon::_run()
 			//change the data on the display ONLY IF a change in data happened
 			if (_dataChanged)
 			{
-				display_s.write(12);
+				Serial.write(12);
 				//	                       111111
 				//				 0123456789012345
-				display_s.print(" DATE GOES HERE ");
-				display_s.write(13);
+				Serial.print(" DATE GOES HERE ");
+				Serial.write(13);
 				//	                       111111
 				//				 0123456789012345
 				//should print  "T:36.5 -- H:60.2" for example
-				display_s.print("T:");
-				display_s.print(_tempInt, DEC);
-				display_s.print(".");
-				display_s.print(_tempDec, DEC);
-				
-				display_s.print("--");
-
-				display_s.print("H:");
-				display_s.print(_humInt, DEC);
-				display_s.print(".");
-				display_s.print(_humDec, DEC);
-				
-				_dataChanged = 0;
-				
-				//printing to USB serial 
-				Serial.print("TEMP: ");
+				Serial.print("T:");
 				Serial.print(_tempInt, DEC);
 				Serial.print(".");
 				Serial.print(_tempDec, DEC);
-				Serial.println();
-				Serial.print("HUM : ");
+				
+				Serial.print("--");
+
+				Serial.print("H:");
 				Serial.print(_humInt, DEC);
 				Serial.print(".");
 				Serial.print(_humDec, DEC);
-				Serial.println();
+				
+				_dataChanged = 0;
 			}
 			
 			
@@ -125,6 +107,7 @@ void MenuDaemon::_execute(const Message& msg)
 			break;
 		case INPUT_D:
 			//it just prints what input it gets right now, it will be changed soon
+			/*
 			Serial.print("Received a message from INPUT_D :");
 			for (byte i=0; i<MESSAGE_SIZE; i++)
 			{
@@ -133,6 +116,7 @@ void MenuDaemon::_execute(const Message& msg)
 				Serial.print("] ");
 			}
 			Serial.println();
+			*/
 			break;
 	}
 }
