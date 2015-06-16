@@ -20,7 +20,6 @@
 #ifndef MENU_D_H
 #define MENU_D_H
 
-#include <SoftwareSerial.h>
 #include "Daemon.h"
 
 #define DISPLAY_PIN 1
@@ -47,8 +46,10 @@ class MenuDaemon : public Daemon
 		byte _tempInt, _tempDec;
 		byte _humInt, _humDec;
 		unsigned long int _rollTime;
-		static SoftwareSerial display_s;
 		byte _dataChanged;
+		
+		byte _DD, _MM, _YY;
+		byte _hh, _mm, _ss;
 };
 
 #endif  MENU_D_H

@@ -20,12 +20,12 @@
 
 void RTCDaemon::setup()
 {
-  Serial.println("RTCDaemon started");
+  Serial.println(F("RTCDaemon started"));
 	_rtc.begin();
 	if (_rtc.isrunning()) 
 		_rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 	else 
-		Serial.println("ERROR: Unable to find a RTC device!");
+		Serial.println(F("ERROR: Unable to find a RTC device!"));
 }
 
 void RTCDaemon::_run()
@@ -38,10 +38,12 @@ void RTCDaemon::_execute(const Message& msg)
 	if (_rtc.isrunning())
 	{
 		//if it's running, process the message and send it back to the sender
+		//the message is sent back to the requester in the format:
+		//[DD][MM][YY][HH][mm][ss]
 		DateTime now = _rtc.now();
 		pushMessageData(now.day());
 		pushMessageData(now.month());
-		pushMessageData(now.year());
+		pushMessageData(now.year() - 2000);
 		pushMessageData(now.hour());
 		pushMessageData(now.minute());
 		pushMessageData(now.second());

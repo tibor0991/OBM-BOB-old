@@ -21,7 +21,6 @@
 #include <Wire.h>
 #include <RTClib.h>
 #include <DHT.h>
-#include <SoftwareSerial.h>
 
 #include "Message.h"
 #include "MessageQueue.h"
@@ -53,19 +52,19 @@ void setup()
   Wire.begin();
   
   //Startup
-  Serial.println("Open Bio Medical - B.O.B.");
-  Serial.println("======INIT======");
-  Serial.println("Loading daemons...");
+  Serial.println(F("Open Bio Medical - B.O.B."));
+  Serial.println(F("======INIT======"));
+  Serial.println(F("Loading daemons..."));
   daemons[RTC_D] = &rtc_d;
   daemons[SERIAL_D] = &serial_d;
   daemons[SENSORS_D] = &sensors_d;
   daemons[MENU_D] = &menu_d;
   daemons[INPUT_D] = &input_d;
   
-  Serial.println("Starting Daemons...");
+  Serial.println(F("Starting Daemons..."));
   for (byte i =0; i<DAEMON_COUNT; i++)
     daemons[i]->setup();
-  Serial.println("======READY======");
+  Serial.println(F("======READY======"));
 }
 
 void loop()
@@ -74,7 +73,6 @@ void loop()
     daemons[_daemonCounter]->step();
     _daemonCounter = (++_daemonCounter) % DAEMON_COUNT;
     //dispatcher sends messages from the message queue to the daemons
-    //std::cout << "Dispatching phase...\n";
     while (!getMessageBus().isEmpty())
     {
         Message currentMsg = getMessageBus().dequeue();

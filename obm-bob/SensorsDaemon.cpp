@@ -27,7 +27,7 @@ DHT SensorsDaemon::sensor3(SENS3_PIN, DHT22);
 
 void SensorsDaemon::setup()
 {
-	Serial.println("Starting SensorsDaemon...");
+	Serial.println(F("Starting SensorsDaemon..."));
 	sensors[SENS1] = &sensor1;
 	sensors[SENS2] = &sensor2;
 	sensors[SENS3] = &sensor3;
@@ -41,7 +41,7 @@ void SensorsDaemon::setup()
 		}
 		else 
 		{
-			Serial.print("ERROR: Sensor not connected: ");
+			Serial.print(F("ERROR: Sensor not connected: "));
 			Serial.println(_currentSensor+1, DEC);
 		}
 		
@@ -79,7 +79,7 @@ void SensorsDaemon::_run()
 		}
 		else 
 		{
-			Serial.print("Error reading sensor n. ");
+			Serial.print(F("Error reading sensor n. "));
 			Serial.print(_currentSensor, DEC);
 			Serial.println();	
 		}

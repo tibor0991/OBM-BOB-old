@@ -21,7 +21,7 @@
 
 void SerialDaemon::setup()
 {
-	Serial.println("SerialDaemon started.");
+	Serial.println(F("SerialDaemon started."));
 }
 
 void SerialDaemon::_run()
@@ -31,7 +31,7 @@ void SerialDaemon::_run()
 
 void SerialDaemon::_execute(const Message& msg)
 {
-	Serial.print("Message from ");
+	Serial.print(F("Message from "));
 	Serial.print(msg.senderID, DEC);
 	Serial.print(":");
 	for (byte i=0; i<MESSAGE_SIZE; i++)

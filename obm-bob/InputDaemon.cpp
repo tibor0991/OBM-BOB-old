@@ -21,7 +21,7 @@
 
 void InputDaemon::setup()
 {
-	Serial.println("Starting InputDaemon...");
+	Serial.println(F("Starting InputDaemon...7"));
 }
 
 void InputDaemon::_run()
