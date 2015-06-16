@@ -39,7 +39,7 @@ class MenuDaemon : public Daemon
 		virtual void _run();
         virtual void _execute(const Message& msg);
 	private:
-		enum MENU_STATES {IDLE_SCREEN1 = 0, IDLE_SCREEN2};
+		enum MENU_STATES {IDLE_SCREEN = 0};
 		MENU_STATES _currentState;
 		
 		//IDLE SCREEN vars
