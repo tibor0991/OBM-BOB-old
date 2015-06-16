@@ -46,25 +46,38 @@ InputDaemon input_d(INPUT_D);
 
 void setup()
 {
-  //starts the serial interface
-  Serial.begin(9600);
-  //starts the I2C/Wire interface
-  Wire.begin();
-  
-  //Startup
-  Serial.println(F("Open Bio Medical - B.O.B."));
-  Serial.println(F("======INIT======"));
-  Serial.println(F("Loading daemons..."));
-  daemons[RTC_D] = &rtc_d;
-  daemons[SERIAL_D] = &serial_d;
-  daemons[SENSORS_D] = &sensors_d;
-  daemons[MENU_D] = &menu_d;
-  daemons[INPUT_D] = &input_d;
-  
-  Serial.println(F("Starting Daemons..."));
-  for (byte i =0; i<DAEMON_COUNT; i++)
-    daemons[i]->setup();
-  Serial.println(F("======READY======"));
+	//starts the serial interface
+	Serial.begin(9600);
+	//starts the I2C/Wire interface
+	Wire.begin();
+
+	//Startup
+	Serial.println(F("Open Bio Medical - B.O.B."));
+	
+	//plays a jingle (Ooooo Beeee Emmmmm)
+	Serial.write(212); // 1/4 note
+	Serial.write(216); //sets 4th scale (A = 440hz)
+	Serial.write(220); //plays A
+
+	Serial.write(222); //plays B
+
+	Serial.write(213); //note length to 1/2
+	Serial.write(217); //sets 5th scale
+	Serial.write(228); //plays F
+
+
+	Serial.println(F("======INIT======"));
+	Serial.println(F("Loading daemons..."));
+	daemons[RTC_D] = &rtc_d;
+	daemons[SERIAL_D] = &serial_d;
+	daemons[SENSORS_D] = &sensors_d;
+	daemons[MENU_D] = &menu_d;
+	daemons[INPUT_D] = &input_d;
+
+	Serial.println(F("Starting Daemons..."));
+	for (byte i =0; i<DAEMON_COUNT; i++)
+		daemons[i]->setup();
+	Serial.println(F("======READY======"));
 }
 
 void loop()

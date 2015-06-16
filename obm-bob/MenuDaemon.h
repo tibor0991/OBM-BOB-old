@@ -45,9 +45,9 @@ class MenuDaemon : public Daemon
 		//IDLE SCREEN vars
 		byte _tempInt, _tempDec;
 		byte _humInt, _humDec;
-		unsigned long int _rollTime;
 		byte _dataChanged;
 		
+		byte _timeChanged;
 		byte _DD, _MM, _YY;
 		byte _hh, _mm, _ss;
 };

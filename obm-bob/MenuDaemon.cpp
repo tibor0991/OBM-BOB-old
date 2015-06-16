@@ -28,7 +28,7 @@ void MenuDaemon::setup()
 	
 	_dataChanged = 0;
 	_currentState = IDLE_SCREEN;
-	_rollTime = 0;
+	_timeChanged = 0;
 }
 
 void MenuDaemon::_run()
@@ -51,17 +51,18 @@ void MenuDaemon::_run()
 		case IDLE_SCREEN:
 			//prints the idle page
 			
-			//change the data on the display ONLY IF a change in data happened
-					
+			//change the data on the display ONLY IF a change in data happened					
 			if (_dataChanged)
 			{
 
-				Serial.write(12); //clears the screen
+				//Serial.write(12); //clears the screen
 				//	                       1111111111
 				//				 01234567890123456789
 				//print the date
+				if (_DD < 10) Serial.print(0, DEC);
 				Serial.print(_DD, DEC);
 				Serial.print("/");
+				if (_MM < 10) Serial.print(0, DEC);
 				Serial.print(_MM, DEC);
 				Serial.print("/");
 				Serial.print(_YY+2000, DEC);
@@ -69,10 +70,13 @@ void MenuDaemon::_run()
 				Serial.print(" ");
 				
 				//print the time
+				if (_hh < 10) Serial.print(0, DEC);
 				Serial.print(_hh, DEC);
 				Serial.print(":");
+				if (_mm < 10) Serial.print(0, DEC);
 				Serial.print(_mm, DEC);
 				Serial.print(":");
+				if (_ss < 10) Serial.print(0, DEC);
 				Serial.print(_ss, DEC);
 				
 				//prints the temp
