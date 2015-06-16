@@ -50,11 +50,9 @@ void MenuDaemon::_run()
 	{
 		case IDLE_SCREEN:
 			//prints the idle page
-			
-			//change the data on the display ONLY IF a change in data happened					
-			if (_dataChanged)
+			if (_timeChanged)
 			{
-
+				Serial.write(128);
 				//Serial.write(12); //clears the screen
 				//	                       1111111111
 				//				 01234567890123456789
@@ -79,8 +77,14 @@ void MenuDaemon::_run()
 				if (_ss < 10) Serial.print(0, DEC);
 				Serial.print(_ss, DEC);
 				
+				_timeChanged = 0;
+			}
+			//change the data on the display ONLY IF a change in data happened					
+			if (_dataChanged)
+			{
+
 				//prints the temp
-				Serial.write(13);
+				Serial.write(148);
 				//	                    1111111111
 				//			  01234567890123456789
 				//            Temperature: ##.# °C
@@ -91,7 +95,7 @@ void MenuDaemon::_run()
 				/*Bad indent*/   Serial.print(" C");
 				
 				//prints the humidity
-				Serial.write(13);
+				Serial.write(168);
 				//	                    1111111111
 				//			  01234567890123456789
 				//            Humidity: ##.#%
@@ -143,7 +147,7 @@ void MenuDaemon::_execute(const Message& msg)
 			_hh = msg.data[3];
 			_mm = msg.data[4];
 			_ss = msg.data[5];
-			_dataChanged = 1;
+			_timeChanged = 1;
 			break;
 	}
 }

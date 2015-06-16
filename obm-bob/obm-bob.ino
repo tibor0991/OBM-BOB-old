@@ -48,6 +48,7 @@ void setup()
 {
 	//starts the serial interface
 	Serial.begin(9600);
+	delay(100);
 	//starts the I2C/Wire interface
 	Wire.begin();
 
