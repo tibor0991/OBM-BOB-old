@@ -48,8 +48,8 @@ void MenuDaemon::_run()
 	*/
 	switch (_currentState)
 	{
-		case IDLE_SCREEN1:
-			//prints the first idle page
+		case IDLE_SCREEN:
+			//prints the idle page
 			
 			//change the data on the display ONLY IF a change in data happened
 					
@@ -98,23 +98,7 @@ void MenuDaemon::_run()
 				/*Bad indent*/Serial.print("%");
 				
 				_dataChanged = 0; //resets the flag
-			}
-			
-			
-			if (millis() - _rollTime >= IDLE_ROLL_TIME)
-			{
-				_rollTime+= IDLE_ROLL_TIME;
-				_currentState = IDLE_SCREEN2;
-			}			
-			break;
-		case IDLE_SCREEN2:
-			//prints data on the second idle page
-
-			if (millis() - _rollTime >= IDLE_ROLL_TIME)
-			{
-				_rollTime+= IDLE_ROLL_TIME;
-				_currentState = IDLE_SCREEN1;
-			}
+			}		
 			break;
 	}
 	sendMessage(RTC_D);
