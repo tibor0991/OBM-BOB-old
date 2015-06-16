@@ -84,7 +84,7 @@ void MenuDaemon::_run()
 				Serial.print(_tempInt, DEC);
 				/*Sorry   */   Serial.print(".");
 				Serial.print(_tempDec, DEC);
-				/*Bad indent*/   Serial.print(" °C");
+				/*Bad indent*/   Serial.print(" C");
 				
 				//prints the humidity
 				Serial.write(13);
