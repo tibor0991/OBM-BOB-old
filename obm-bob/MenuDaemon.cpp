@@ -27,7 +27,7 @@ void MenuDaemon::setup()
 	delay(5);
 	
 	_dataChanged = 0;
-	_currentState = IDLE_SCREEN1;
+	_currentState = IDLE_SCREEN;
 	_rollTime = 0;
 }
 
