@@ -79,6 +79,8 @@ void setup()
 	for (byte i =0; i<DAEMON_COUNT; i++)
 		daemons[i]->setup();
 	Serial.println(F("======READY======"));
+	delay(50);
+	Serial.write(12);
 }
 
 void loop()
