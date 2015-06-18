@@ -33,8 +33,8 @@ class RTCDaemon : public Daemon
 		virtual void _run();
 		virtual void _execute(const Message& msg);
 	private:
-		RTC_DS1307 _rtc;
-		unsigned long int previousTime = 0; 
+		static RTC_DS1307 _rtc;
+		static unsigned long int previousTime; 
         //if we use a standard int, it quickly overflows
 };
 

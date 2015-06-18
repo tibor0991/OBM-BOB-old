@@ -16,16 +16,32 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef QUEUE_H
-#define QUEUE_H
 
+/*
+LoggerDaemon.h: every 5 minutes saves an entry in the log file on a SD card.
+The SD card is managed through a SD adapter mounted on the SPI bus.
+*/
 
-class Queue
+#include "Daemon.h"
+
+#include <SPI.h>
+#include <SdFat.h>
+
+#define CS_PIN 10
+
+class LoggerDaemon : public Daemon
 {
-    public:
-        Queue();
-    protected:
-    private:
+	public:
+		LoggerDaemon(byte ID) : LoggerDaemon(ID){}
+		void setup();
+	protected:
+		virtual void _run();
+        virtual void _execute(const Message& msg);
+	private:
+		enum LoggerState {SESSION_START = 0};
+		LoggerState _state;
+		byte _dateReceived, _dateRequest;
+		byte _DD, _MM, _YY;
+		byte _hh, _mm, _ss;
+		
 };
-
-#endif // QUEUE_H

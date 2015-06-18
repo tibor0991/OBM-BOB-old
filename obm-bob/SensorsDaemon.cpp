@@ -115,6 +115,7 @@ void SensorsDaemon::_run()
 			pushMessageData(int_part);
 			pushMessageData(dec_part);
 			sendMessage(MENU_D);
+			//sendMessage(LOGGER_D);
 			clearMessageData();
 			_tempAvg = 0;
 			_humAvg = 0;

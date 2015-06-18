@@ -18,6 +18,9 @@
 */
 #include "RTCDaemon.h"
 
+RTC_DS1307 RTCDaemon::_rtc;
+unsigned long int RTCDaemon::previousTime = 0;
+
 void RTCDaemon::setup()
 {
   Serial.println(F("RTCDaemon started"));

@@ -21,6 +21,8 @@
 #include <Wire.h>
 #include <RTClib.h>
 #include <DHT.h>
+#include <SPI.h>
+#include <SdFat.h>
 
 #include "Message.h"
 #include "MessageQueue.h"
@@ -33,6 +35,7 @@
 #include "SensorsDaemon.h"
 #include "MenuDaemon.h"
 #include "InputDaemon.h"
+#include "LoggerDaemon.h"
 
 byte _daemonCounter = 0;
 Daemon* daemons[DAEMON_COUNT];
@@ -42,7 +45,7 @@ RTCDaemon rtc_d(RTC_D);
 SensorsDaemon sensors_d(SENSORS_D);
 MenuDaemon menu_d(MENU_D);
 InputDaemon input_d(INPUT_D);
-
+LoggerDaemon logged_d(LOGGER_D);
 
 void setup()
 {
