@@ -43,5 +43,6 @@ class LoggerDaemon : public Daemon
 		byte _dateReceived, _dateRequest;
 		byte _DD, _MM, _YY;
 		byte _hh, _mm, _ss;
+		char filename[32];
 		
 };

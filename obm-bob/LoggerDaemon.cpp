@@ -41,7 +41,7 @@ void LoggerDaemon::setup()
 	pinMode(CS_PIN, OUTPUT);
 	
 	SdFat SD;
-	if (!SD.begin(CS_PIN)) Serial.println(F("Error setting up the SD comm!"));
+	if (!SD.begin()) Serial.println(F("Error setting up the SD comm!"));
 	else 
 	{
 		Serial.println(F("SD connected."));	
@@ -88,6 +88,7 @@ void LoggerDaemon::_run()
 		-SESSION_START: the logger just started, needs to ask the RTC Daemon the current date/time, create a new folder if possible,
 						create a new index file, 
 	*/
+	SdFat SD;
 	switch(_state)
 	{
 		case SESSION_START:
@@ -105,9 +106,48 @@ void LoggerDaemon::_run()
 				What happens now?
 				I don't want to use the String class from Arduino, since I'm pretty fucking sure it uses dynamic allocation,
 				therefore I can't use class String's methods for converting integers to char arrays;
-				and that's where the modulo operator comes in help.
-				//PS : I love modulo.
+				I must use a manual integer conversion, hoping that integer division doesn't fuck me.
 				*/
+				//I hate myself for this and I want to die
+				//all in the name of heap purity
+				//in case this wasn't clear: NO DYNAMIC ALLOCATION = REALLY LOW CHANCE OF SYSTEM CRASH DUE TO STACK CRASH
+				
+				filename[0] = '/';
+				filename[1] = 'l';
+				filename[2] = 'o';
+				filename[3] = 'g';
+				filename[4] = 's';
+				filename[5] = '/';
+				filename[6] = '2';
+				filename[7] = '0';
+				filename[8] = (_YY / 10) + 48;
+				filename[9] = (_YY - (filename[8]-48) * 10) + 48;
+				filename[10] = (_MM / 10) + 48;
+				filename[11] = (_MM - (filename[10]-48) * 10) + 48;
+				filename[12] = (_DD / 10) + 48;
+				filename[13] = (_DD - (filename[12]-48) * 10) + 48;
+				filename[14] = '\0';
+				//AAARGH!!!!! WHAT IS THIS BLASPHEMY!!!
+				bool isOpened = SD.begin();
+				if (isOpened && !SD.exists(filename)) //if the daily folder exists
+				{
+					SD.mkdir(filename);
+				}
+				
+				filename[14] = '/';
+				filename[15] = 'i';
+				filename[16] = 'n';
+				filename[17] = 'd';
+				filename[18] = 'e';
+				filename[19] = 'x';
+				filename[20] = '\0';
+
+				if (isOpened && !SD.exists(filename)) //if the index exists, there's already at least one log file
+				{
+					SdFile file = SD.open(filename);
+					file.close();
+				}
+				
 				
 			}
 			break;
