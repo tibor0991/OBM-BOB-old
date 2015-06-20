@@ -26,6 +26,7 @@ The SD card is managed through a SD adapter mounted on the SPI bus.
 
 #include <SPI.h>
 #include <SdFat.h>
+#include <string.h> //thanks C std lib for existing
 
 #define CS_PIN 10
 
@@ -38,11 +39,12 @@ class LoggerDaemon : public Daemon
 		virtual void _run();
         virtual void _execute(const Message& msg);
 	private:
-		enum LoggerState {SESSION_START = 0};
+		enum LoggerState {SESSION_START = 0, SESSION_LOG};
 		LoggerState _state;
 		byte _dateReceived, _dateRequest;
 		byte _DD, _MM, _YY;
 		byte _hh, _mm, _ss;
 		char filename[32];
+		bool isOpened;
 		
 };

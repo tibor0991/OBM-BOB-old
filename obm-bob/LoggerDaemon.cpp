@@ -50,15 +50,13 @@ void LoggerDaemon::setup()
 		-root
 		|----logs
 			|----YYYYMMDD
-				|----YYYYMMDD.ind
-				|----00.log
-				|----01.log
+				|----hhmmss.log
+				|----...
+				|----...
 		
 		.ind files track the start time of each log, while .log files keep trackof the data
 		
 		Example .ind file:
-		00,13:35:46
-		01,16:56:45
 		
 		Example .log file (00.log):
 		36.5,60.2,50.3,30.4#
@@ -108,6 +106,8 @@ void LoggerDaemon::_run()
 				therefore I can't use class String's methods for converting integers to char arrays;
 				I must use a manual integer conversion, hoping that integer division doesn't fuck me.
 				*/
+				
+				/*
 				//I hate myself for this and I want to die
 				//all in the name of heap purity
 				//in case this wasn't clear: NO DYNAMIC ALLOCATION = REALLY LOW CHANCE OF SYSTEM CRASH DUE TO STACK CRASH
@@ -128,27 +128,43 @@ void LoggerDaemon::_run()
 				filename[13] = (_DD - (filename[12]-48) * 10) + 48;
 				filename[14] = '\0';
 				//AAARGH!!!!! WHAT IS THIS BLASPHEMY!!!
-				bool isOpened = SD.begin();
-				if (isOpened && !SD.exists(filename)) //if the daily folder exists
+				*/
+				
+				strcpy(filename, "/logs/20");
+				
+				char date_str[8];
+				date_str[0] = (_YY / 10) + 48;
+				date_str[1] = (_YY - (date_str[0]-48) * 10) + 48;
+				date_str[2] = (_MM / 10) + 48;
+				date_str[3] = (_MM - (date_str[2]-48) * 10) + 48;
+				date_str[4] = (_DD / 10) + 48;
+				date_str[5] = (_DD - (date_str[4]-48) * 10) + 48;
+				date_str[7] = '\0';
+				
+				strcat(filename, date_str);
+				
+				if (!isOpened) isOpened = SD.begin();
+				if (isOpened) //if the SD stream has been successfully opened
 				{
-					SD.mkdir(filename);
+					if (!SD.exists(filename)) SD.mkdir(filename); //if the folder doesn't exist, create it
+					
+					//parse the current time
+					char time_str[8];
+					time_str[0] = (_hh / 10) + 48;
+					time_str[1] = (_hh - (time_str[0]-48) * 10) + 48;
+					time_str[2] = (_mm / 10) + 48;
+					time_str[3] = (_mm - (time_str[2]-48) * 10) + 48;
+					time_str[4] = (_ss / 10) + 48;
+					time_str[5] = (_ss - (time_str[4]-48) * 10) + 48;
+					time_str[7] = '\0';
+					
+					strcat(filename, time_str);
+					strcat(filename, ".log");
+					
+					File logFile = SD.open(filename);
+					logFile.close();
+					_state = SESSION_LOG;
 				}
-				
-				filename[14] = '/';
-				filename[15] = 'i';
-				filename[16] = 'n';
-				filename[17] = 'd';
-				filename[18] = 'e';
-				filename[19] = 'x';
-				filename[20] = '\0';
-
-				if (isOpened && !SD.exists(filename)) //if the index exists, there's already at least one log file
-				{
-					SdFile file = SD.open(filename);
-					file.close();
-				}
-				
-				
 			}
 			break;
 	}
