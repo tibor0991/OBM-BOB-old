@@ -30,7 +30,6 @@
 
 #include "Daemons.h"
 
-#include "SerialDaemon.h"
 #include "RTCDaemon.h"
 #include "SensorsDaemon.h"
 #include "MenuDaemon.h"
@@ -40,12 +39,11 @@
 byte _daemonCounter = 0;
 Daemon* daemons[DAEMON_COUNT];
 
-SerialDaemon serial_d(SERIAL_D);
 RTCDaemon rtc_d(RTC_D);
 SensorsDaemon sensors_d(SENSORS_D);
 MenuDaemon menu_d(MENU_D);
 InputDaemon input_d(INPUT_D);
-LoggerDaemon logged_d(LOGGER_D);
+LoggerDaemon logger_d(LOGGER_D);
 
 void setup()
 {
@@ -73,10 +71,10 @@ void setup()
 	Serial.println(F("======INIT======"));
 	Serial.println(F("Loading daemons..."));
 	daemons[RTC_D] = &rtc_d;
-	daemons[SERIAL_D] = &serial_d;
 	daemons[SENSORS_D] = &sensors_d;
 	daemons[MENU_D] = &menu_d;
 	daemons[INPUT_D] = &input_d;
+	daemons[LOGGER_D] = &logger_d;
 
 	Serial.println(F("Starting Daemons..."));
 	for (byte i =0; i<DAEMON_COUNT; i++)

@@ -40,8 +40,9 @@ void LoggerDaemon::setup()
 	Serial.println(F("Starting LoggerDaemon..."));
 	pinMode(CS_PIN, OUTPUT);
 	
+	
 	SdFat SD;
-	if (!SD.begin()) Serial.println(F("Error setting up the SD comm!"));
+	if (!SD.begin(CS_PIN)) Serial.println(F("Error setting up the SD comm!"));
 	else 
 	{
 		Serial.println(F("SD connected."));	
@@ -71,8 +72,12 @@ void LoggerDaemon::setup()
 		NOTE TO SELF: write a PC-side log packer to pack all logs into a single log file, both for daily logs and total logs.
 		*/
 	}
+	
+	
 	_state = SESSION_START;
 	_dateRequest = 1;
+	_isOpened = false;
+	
 }
 
 void LoggerDaemon::_run()
@@ -86,6 +91,7 @@ void LoggerDaemon::_run()
 		-SESSION_START: the logger just started, needs to ask the RTC Daemon the current date/time, create a new folder if possible,
 						create a new index file, 
 	*/
+	
 	SdFat SD;
 	switch(_state)
 	{
@@ -143,8 +149,8 @@ void LoggerDaemon::_run()
 				
 				strcat(filename, date_str);
 				
-				if (!isOpened) isOpened = SD.begin();
-				if (isOpened) //if the SD stream has been successfully opened
+				if (!_isOpened) _isOpened = SD.begin(CS_PIN);
+				if (_isOpened) //if the SD stream has been successfully opened
 				{
 					if (!SD.exists(filename)) SD.mkdir(filename); //if the folder doesn't exist, create it
 					
@@ -173,6 +179,7 @@ void LoggerDaemon::_run()
 
 void LoggerDaemon::_execute(const Message& msg)
 {
+	
 	switch(msg.senderID)
 	{
 		case RTC_D:
@@ -187,4 +194,5 @@ void LoggerDaemon::_execute(const Message& msg)
 			_dateReceived = 1;
 			break;
 	}
+	
 }

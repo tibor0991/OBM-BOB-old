@@ -33,7 +33,7 @@ The SD card is managed through a SD adapter mounted on the SPI bus.
 class LoggerDaemon : public Daemon
 {
 	public:
-		LoggerDaemon(byte ID) : LoggerDaemon(ID){}
+		LoggerDaemon(byte ID) : Daemon(ID){}
 		void setup();
 	protected:
 		virtual void _run();
@@ -45,6 +45,6 @@ class LoggerDaemon : public Daemon
 		byte _DD, _MM, _YY;
 		byte _hh, _mm, _ss;
 		char filename[32];
-		bool isOpened;
+		bool _isOpened;
 		
 };
