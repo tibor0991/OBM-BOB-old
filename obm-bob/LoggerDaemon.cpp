@@ -138,6 +138,12 @@ void LoggerDaemon::_run()
 				
 				strcpy(filename, "/logs/20");
 				
+				//-----------------DEBUG
+				Serial.write(12);
+				Serial.println(filename);
+				delay(1000);
+				//----------------------
+				
 				char date_str[8];
 				date_str[0] = (_YY / 10) + 48;
 				date_str[1] = (_YY - (date_str[0]-48) * 10) + 48;
@@ -166,6 +172,12 @@ void LoggerDaemon::_run()
 					
 					strcat(filename, time_str);
 					strcat(filename, ".log");
+					
+					//-----------------DEBUG
+					Serial.write(12);
+					Serial.println(filename);
+					delay(1000);
+					//----------------------
 					
 					File logFile = SD.open(filename);
 					logFile.close();
