@@ -90,7 +90,8 @@ void loop()
     daemons[_daemonCounter]->step();
     _daemonCounter = (++_daemonCounter) % DAEMON_COUNT;
     //dispatcher sends messages from the message queue to the daemons
-    while (!getMessageBus().isEmpty())
+    //while (!getMessageBus().isEmpty())
+	if (!getMessageBus().isEmpty())
     {
         Message currentMsg = getMessageBus().dequeue();
         daemons[currentMsg.receiverID]->receiveMessage(currentMsg);

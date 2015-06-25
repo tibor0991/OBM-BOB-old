@@ -74,6 +74,8 @@ void LoggerDaemon::setup()
 	}
 	
 	
+	memset(filename, '\0', MAX_FILENAME);
+	
 	_state = SESSION_START;
 	_dateRequest = 1;
 	_isOpened = false;
@@ -137,13 +139,7 @@ void LoggerDaemon::_run()
 				*/
 				
 				strcpy(filename, "/logs/20");
-				
-				//-----------------DEBUG
-				Serial.write(12);
-				Serial.println(filename);
-				delay(1000);
-				//----------------------
-				
+							
 				char date_str[8];
 				date_str[0] = (_YY / 10) + 48;
 				date_str[1] = (_YY - (date_str[0]-48) * 10) + 48;
@@ -151,9 +147,10 @@ void LoggerDaemon::_run()
 				date_str[3] = (_MM - (date_str[2]-48) * 10) + 48;
 				date_str[4] = (_DD / 10) + 48;
 				date_str[5] = (_DD - (date_str[4]-48) * 10) + 48;
+				date_str[6] = '/';
 				date_str[7] = '\0';
 				
-				strcat(filename, date_str);
+				strcat(filename, date_str);			
 				
 				if (!_isOpened) _isOpened = SD.begin(CS_PIN);
 				if (_isOpened) //if the SD stream has been successfully opened
@@ -168,10 +165,11 @@ void LoggerDaemon::_run()
 					time_str[3] = (_mm - (time_str[2]-48) * 10) + 48;
 					time_str[4] = (_ss / 10) + 48;
 					time_str[5] = (_ss - (time_str[4]-48) * 10) + 48;
+					time_str[6] = '.';
 					time_str[7] = '\0';
 					
 					strcat(filename, time_str);
-					strcat(filename, ".log");
+					strcat(filename, "log");
 					
 					//-----------------DEBUG
 					Serial.write(12);

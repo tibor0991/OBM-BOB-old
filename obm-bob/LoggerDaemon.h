@@ -29,6 +29,8 @@ The SD card is managed through a SD adapter mounted on the SPI bus.
 #include <string.h> //thanks C std lib for existing
 
 #define CS_PIN 10
+#define MAX_FILENAME 32
+
 
 class LoggerDaemon : public Daemon
 {
@@ -44,7 +46,7 @@ class LoggerDaemon : public Daemon
 		byte _dateReceived, _dateRequest;
 		byte _DD, _MM, _YY;
 		byte _hh, _mm, _ss;
-		char filename[32];
+		char filename[MAX_FILENAME];
 		bool _isOpened;
 		
 };
