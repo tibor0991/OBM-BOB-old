@@ -79,7 +79,6 @@ void LoggerDaemon::setup()
 	_state = SESSION_START;
 	_dateRequest = 1;
 	_isOpened = false;
-	
 }
 
 void LoggerDaemon::_run()
@@ -172,7 +171,6 @@ void LoggerDaemon::_run()
 					strcat(filename, "log");
 					
 					//-----------------DEBUG
-					Serial.write(12);
 					Serial.println(filename);
 					delay(1000);
 					//----------------------
@@ -182,6 +180,9 @@ void LoggerDaemon::_run()
 					_state = SESSION_LOG;
 				}
 			}
+			break;
+		case SESSION_LOG:
+			Serial.println(F("Logger status: LOG"));
 			break;
 	}
 	

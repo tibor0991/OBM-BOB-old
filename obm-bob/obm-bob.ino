@@ -56,6 +56,7 @@ void setup()
 	//Startup
 	Serial.println(F("Open Bio Medical - B.O.B."));
 	
+	/* to enable later
 	//plays a jingle (Ooooo Beeee Emmmmm)
 	Serial.write(212); // 1/4 note
 	Serial.write(216); //sets 4th scale (A = 440hz)
@@ -66,7 +67,7 @@ void setup()
 	Serial.write(213); //note length to 1/2
 	Serial.write(217); //sets 5th scale
 	Serial.write(228); //plays F
-
+	*/
 
 	Serial.println(F("======INIT======"));
 	Serial.println(F("Loading daemons..."));
