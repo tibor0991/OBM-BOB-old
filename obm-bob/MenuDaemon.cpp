@@ -108,6 +108,9 @@ void MenuDaemon::_run()
 				_dataChanged = 0; //resets the flag
 			}		
 			break;
+		case OPTIONS_SCREEN:
+			//prints the options page
+			break;
 	}
 	sendMessage(RTC_D);
 	clearMessageData();

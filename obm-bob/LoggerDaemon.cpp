@@ -41,7 +41,7 @@ void LoggerDaemon::setup()
 	pinMode(CS_PIN, OUTPUT);
 	
 	
-	SdFat SD;
+	//SdFat SD;
 	if (!SD.begin(CS_PIN)) Serial.println(F("Error setting up the SD comm!"));
 	else 
 	{
@@ -93,7 +93,7 @@ void LoggerDaemon::_run()
 						create a new index file, 
 	*/
 	
-	SdFat SD;
+	//SdFat SD;
 	switch(_state)
 	{
 		case SESSION_START:

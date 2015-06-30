@@ -47,6 +47,7 @@ class LoggerDaemon : public Daemon
 		byte _DD, _MM, _YY;
 		byte _hh, _mm, _ss;
 		char filename[MAX_FILENAME];
+		SdFat SD;
 		bool _isOpened;
 		
 };
