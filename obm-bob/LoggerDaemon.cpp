@@ -151,8 +151,8 @@ void LoggerDaemon::_run()
 				
 				strcat(filename, date_str);			
 				
-				if (!_isOpened) _isOpened = SD.begin(CS_PIN);
-				if (_isOpened) //if the SD stream has been successfully opened
+				//if (!_isOpened) _isOpened = SD.begin(CS_PIN);
+				//if (_isOpened) //if the SD stream has been successfully opened
 				{
 					if (!SD.exists(filename)) SD.mkdir(filename); //if the folder doesn't exist, create it
 					
@@ -175,7 +175,7 @@ void LoggerDaemon::_run()
 					delay(1000);
 					//----------------------
 					
-					File logFile = SD.open(filename);
+					logFile = SD.open(filename);
 					logFile.close();
 					_state = SESSION_LOG;
 				}
