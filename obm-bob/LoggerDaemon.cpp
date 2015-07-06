@@ -175,14 +175,14 @@ void LoggerDaemon::_run()
 					delay(1000);
 					//----------------------
 					
-					logFile = SD.open(filename);
+					logFile = SD.open(filename, FILE_WRITE);
 					logFile.close();
 					_state = SESSION_LOG;
 				}
 			}
 			break;
 		case SESSION_LOG:
-			Serial.println(F("Logger status: LOG"));
+			//Serial.println(F("Logger status: LOG"));
 			break;
 	}
 	
