@@ -30,7 +30,7 @@ The SD card is managed through a SD adapter mounted on the SPI bus.
 
 #define CS_PIN 10
 #define MAX_FILENAME 32
-
+#define MAX_ROW_LENGTH 20
 
 class LoggerDaemon : public Daemon
 {
@@ -47,8 +47,12 @@ class LoggerDaemon : public Daemon
 		byte _DD, _MM, _YY;
 		byte _hh, _mm, _ss;
 		char filename[MAX_FILENAME];
+		char rowBuffer[MAX_ROW_LENGTH];
 		SdFat SD;
 		File logFile;
-		bool _isOpened;
+		byte _tempInt, _tempDec;
+		byte _humInt, _humDec;
+		unsigned long _logTimer;
+		
 		
 };

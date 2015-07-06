@@ -34,8 +34,6 @@ class RTCDaemon : public Daemon
 		virtual void _execute(const Message& msg);
 	private:
 		static RTC_DS1307 _rtc;
-		static unsigned long int previousTime; 
-        //if we use a standard int, it quickly overflows
 };
 
 #endif RTC_D_H

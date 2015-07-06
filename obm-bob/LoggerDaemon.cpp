@@ -60,6 +60,8 @@ void LoggerDaemon::setup()
 		Example .ind file:
 		
 		Example .log file (00.log):
+				  11111111112
+		012345678901234567890
 		36.5,60.2,50.3,30.4#
 		36.0,60.0,50.3,30.4#
 		35.5,60.2,50.3,30.4#
@@ -75,10 +77,15 @@ void LoggerDaemon::setup()
 	
 	
 	memset(filename, '\0', MAX_FILENAME);
+	memset(rowBuffer, '\0', MAX_ROW_LENGTH);
 	
 	_state = SESSION_START;
 	_dateRequest = 1;
-	_isOpened = false;
+	
+	_DD = _MM = _YY = 0;
+	_tempInt = _tempDec = _humInt = _humDec = 0;
+	
+	_logTimer = 0;
 }
 
 void LoggerDaemon::_run()
@@ -171,8 +178,8 @@ void LoggerDaemon::_run()
 					strcat(filename, "log");
 					
 					//-----------------DEBUG
-					Serial.println(filename);
-					delay(1000);
+					//Serial.println(filename);
+					//delay(1000);
 					//----------------------
 					
 					logFile = SD.open(filename, FILE_WRITE);
@@ -183,6 +190,22 @@ void LoggerDaemon::_run()
 			break;
 		case SESSION_LOG:
 			//Serial.println(F("Logger status: LOG"));
+			/*
+			5 minutes = 5 * 60 seconds = 300 * 1000 ms
+			*/
+			#define LOG_TIMER 300*1000
+			if (millis() - _logTimer >= LOG_TIMER)
+			{
+				//log a row in the log file
+				logFile = SD.open(filename, FILE_WRITE);
+				logFile.print(_tempInt, DEC); logFile.print("."); logFile.print(_tempDec, DEC); logFile.print(",");
+				logFile.print(_humInt, DEC); logFile.print("."); logFile.print(_humDec, DEC); logFile.print(",");
+				logFile.print(" N"); logFile.print("\\"); logFile.print("A"); logFile.print(",");
+				logFile.print(" N"); logFile.print("\\"); logFile.print("A"); logFile.print("#"); logFile.println();
+				logFile.close();
+				_logTimer += LOG_TIMER;
+			}
+			
 			break;
 	}
 	
@@ -203,6 +226,12 @@ void LoggerDaemon::_execute(const Message& msg)
 			_mm = msg.data[4];
 			_ss = msg.data[5];
 			_dateReceived = 1;
+			break;
+		case SENSORS_D:
+			_tempInt = msg.data[0];
+			_tempDec = msg.data[1];
+			_humInt = msg.data[2];
+			_humDec = msg.data[3];
 			break;
 	}
 	
