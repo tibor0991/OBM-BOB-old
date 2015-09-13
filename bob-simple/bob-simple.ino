@@ -55,9 +55,20 @@ int input_value = 0;
 #define RIGHT_VALUE  382
 #define BACK_VALUE	 254
 #define RESET_VALUE  126
+byte pressed_button = 0;
+#define ENTER_BUTTON 	0x00000001
+#define DOWN_BUTTON  	0x00000010
+#define LEFT_BUTTON   	0x00000100
+#define UP_BUTTON     	0x00001000
+#define RIGHT_BUTTON  	0x00010000
+#define BACK_BUTTON	 	0x00100000
+#define RESET_BUTTON  	0x01000000
+#define ERROR			0x11111111
 
 //display
 bool data_changed = false;
+enum DisplayState {IDLE, MENU, DATE_SETUP};
+DisplayState d_state = IDLE;
 
 void setup()
 {
@@ -119,95 +130,129 @@ void loop()
 	switch(input_value)
 	{
 		case REST_VALUE:
-			Serial.println("No button pressed!");
+			pressed_button = 0;
 			break;
 		case ENTER_VALUE:
-			Serial.println("ENTER pressed!");
+			pressed_button = ENTER_BUTTON;
 			break;
 		case DOWN_VALUE:
-			Serial.println("DOWN pressed!");
+			pressed_button = DOWN_BUTTON;
 			break;
 		case LEFT_VALUE:
-			Serial.println("LEFT pressed!");
+			pressed_button = LEFT_BUTTON;
 			break;
 		case UP_VALUE:
-			Serial.println("UP pressed!");
+			pressed_button = UP_BUTTON;
 			break;
 		case RIGHT_VALUE:
-			Serial.println("RIGHT pressed!");
+			pressed_button = RIGHT_BUTTON;
 			break;
 		case BACK_VALUE:
-			Serial.println("BACK pressed!");
+			pressed_button = BACK_BUTTON;
 			break;
 		case RESET_VALUE:
-			Serial.println("RESET pressed!");
+			pressed_button = RESET_BUTTON;
 			break;
 		default:
-			Serial.print("Unrecognized input! "); Serial.println(input_value, DEC);
+			pressed_button = ERROR;
 			break;
 	}
 	
 	
 	
 	//display
-	Serial.write(128);
-	//Serial.write(12); //clears the screen
-	//	                       1111111111
-	//				 01234567890123456789
-	//print the date
-	DateTime now = rtc.now();
 	
-	if (now.day() < 10) Serial.print(0, DEC);
-	Serial.print(now.day(), DEC);
-	Serial.print("/");
-	if (now.month() < 10) Serial.print(0, DEC);
-	Serial.print(now.month(), DEC);
-	Serial.print("/");
-	Serial.print(now.year(), DEC);
-	
-	Serial.print(" ");
-	
-	//print the time
-	if (now.hour() < 10) Serial.print(0, DEC);
-	Serial.print(now.hour(), DEC);
-	Serial.print(":");
-	if (now.minute() < 10) Serial.print(0, DEC);
-	Serial.print(now.minute(), DEC);
-	Serial.print(":");
-	if (now.second() < 10) Serial.print(0, DEC);
-	Serial.print(now.second(), DEC);
-	
-	if (data_changed)
+	switch(d_state)
 	{
-		Serial.write(148);
-		//	                    1111111111
-		//			  01234567890123456789
-		//            Temperature: ##.# °C
-		Serial.print(F("Temperature:"));
-		Serial.print(temp_avg, DEC);
-		/*Bad indent*/   Serial.print(" C");
-		
-		//prints the humidity
-		Serial.write(168);
-		//	                    1111111111
-		//			  01234567890123456789
-		//            Humidity: ##.#%
-		Serial.print(F("Humidity:"));
-		Serial.print(hum_avg, DEC);
-		/*Bad indent*/Serial.print("%");
-		
-		data_changed = false;
+		case IDLE:
+			if (pressed_button != ENTER_BUTTON)
+			{
+				char display_line[20];
+				Serial.write(128);
+				DateTime now = rtc.now();
+				/*
+				//Serial.write(12); //clears the screen
+				//	                       1111111111
+				//				 01234567890123456789
+				//print the date
+				
+				if (now.day() < 10) Serial.print(0, DEC);
+				Serial.print(now.day(), DEC);
+				Serial.print("/");
+				if (now.month() < 10) Serial.print(0, DEC);
+				Serial.print(now.month(), DEC);
+				Serial.print("/");
+				Serial.print(now.year(), DEC);
+				
+				Serial.print(" ");
+				
+				//print the time
+				if (now.hour() < 10) Serial.print(0, DEC);
+				Serial.print(now.hour(), DEC);
+				Serial.print(":");
+				if (now.minute() < 10) Serial.print(0, DEC);
+				Serial.print(now.minute(), DEC);
+				Serial.print(":");
+				if (now.second() < 10) Serial.print(0, DEC);
+				Serial.print(now.second(), DEC);*/
+				memset(display_line, '\0', 20);
+				sprintf(display_line, "%02d/%02d/%d %02d:%02d:%02d\n", now.day(), now.month(), now.year(), now.hour(), now.minute(), now.second());
+				Serial.print(display_line);
+				
+				if (data_changed)
+				{
+					Serial.write(148);/*
+					//	                    1111111111
+					//			  01234567890123456789
+					//            Temperature: ##.# °C
+					Serial.print(F("Temperature:"));
+					Serial.print(temp_avg, DEC);
+					 Serial.print(" C");
+					*/
+					memset(display_line, '\0', 20);
+					sprintf(display_line, "Temperature:%02.2f C\n", temp_avg);
+					
+					//prints the humidity
+					Serial.write(168);/*
+					//	                    1111111111
+					//			  01234567890123456789
+					//            Humidity: ##.#%
+					Serial.print(F("Humidity:"));
+					Serial.print(hum_avg, DEC);
+					Serial.print("%");
+					*/
+					memset(display_line, '\0', 20);
+					sprintf(display_line, "Humidity:%02.2f C\n", hum_avg);
+					
+					
+					data_changed = false;
+				}
+			}
+			else d_state = MENU;
+			break;
+		case MENU:
+			switch(pressed_button)
+			{
+				case BACK_BUTTON:
+					d_state = IDLE;
+					break;
+				default:
+					Serial.println("There will be a menu");
+					break;
+			}
+			break;
 	}
 
 	//logging
 	if (millis() > logger_timer)
 	{
 		logFile = logger.open(file_path, FILE_WRITE);
+		memset(row_buffer, '\0', MAX_ROW_LENGTH);
 		sprintf(row_buffer, "%.2f,%.2f\n", temp_avg, hum_avg);
 		logFile.println(row_buffer);
 		logFile.close();
 		logger_timer += LOGGING_INTERVAL;
 	}
 	
-	
+	pressed_button = 0;
 }
