@@ -193,7 +193,7 @@ void LoggerDaemon::_run()
 			/*
 			5 minutes = 5 * 60 seconds = 300 * 1000 ms
 			*/
-			#define LOG_TIMER 300*1000
+			#define LOG_TIMER 300000
 			if (millis() - _logTimer >= LOG_TIMER)
 			{
 				//log a row in the log file
