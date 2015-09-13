@@ -4,6 +4,7 @@
 #include <DHT.h>
 #include <SPI.h>
 #include <SdFat.h>
+#include <string.h>
 
 /**
 Single-file firmware for the OBM-BOB
@@ -34,8 +35,15 @@ RTC_DS1307 rtc;
 
 //SD logger
 SdFat logger;
-SdFile logFile;
+File logFile;
 unsigned long int logger_timer = 0;
+#define CS_PIN 10
+#define MAX_FILENAME 32
+#define MAX_ROW_LENGTH 20
+char file_path[MAX_FILENAME];
+char row_buffer[MAX_ROW_LENGTH];
+#define LOGGING_INTERVAL 300000
+
 
 //input
 int input_value = 0;
@@ -72,6 +80,17 @@ void setup()
 	dht1.begin();
 	dht2.begin();
 	dht3.begin();
+	
+	//setting up the SD card reader
+	pinMode(CS_PIN, OUTPUT);
+	logger.begin(CS_PIN);
+	DateTime now = rtc.now();
+	memset(file_path, '\0', MAX_FILENAME);
+	memset(row_buffer, '\0', MAX_ROW_LENGTH);
+	sprintf(file_path, "/logs/%02d%02d%d/%02d%02%02.log\n", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+	logFile = logger.open(file_path, FILE_WRITE);
+	logFile.close();
+	
 	
 	Serial.write(12); //clear screen
 }
@@ -180,7 +199,15 @@ void loop()
 		data_changed = false;
 	}
 
-
+	//logging
+	if (millis() > logger_timer)
+	{
+		logFile = logger.open(file_path, FILE_WRITE);
+		sprintf(row_buffer, "%.2f,%.2f\n", temp_avg, hum_avg);
+		logFile.println(row_buffer);
+		logFile.close();
+		logger_timer += LOGGING_INTERVAL;
+	}
 	
 	
 }
