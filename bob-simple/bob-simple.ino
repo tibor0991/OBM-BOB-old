@@ -79,7 +79,7 @@ void setup()
 	
 	//setting up the RTC
 	rtc.begin();
-	if (! rtc.isrunning()) rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+	//if (! rtc.isrunning()) rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 	
 	//setting up DHT
 	/*
@@ -98,7 +98,10 @@ void setup()
 	DateTime now = rtc.now();
 	memset(file_path, '\0', MAX_FILENAME);
 	memset(row_buffer, '\0', MAX_ROW_LENGTH);
-	sprintf(file_path, "/logs/%02d%02d%d/%02d%02%02.log\n", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+	if (!logger.exists("logs") logger.mkdir("logs");
+	sprintf(file_path, "/logs/%02d%02d%d", now.year(), now.month(), now.day());
+	if (!logger.exists(file_path)) logger.mkdir(file_path);
+	sprintf(file_path, "/logs/%02d%02d%d/%02d%02%02.log", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
 	logFile = logger.open(file_path, FILE_WRITE);
 	logFile.close();
 	
