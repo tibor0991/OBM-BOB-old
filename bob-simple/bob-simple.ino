@@ -29,8 +29,31 @@ float temp_avg = 0, hum_avg = 0;
 unsigned long int sensor_timer = 0;
 #define SENSOR_INTERVAL 5000
 
+//thermal pad
+#define TH_PIN 5
+#define TEMP_THR_LOW 35
+#define TEMP_THR_HI 37
+
+//alarms
+byte alarm_flags = 0;
+#define ALARM_REST 0
+#define LOW_TEMP_ALARM 	1
+#define HIGH_TEMP_ALARM 2
+#define LOW_HUMI_ALARM 	4
+#define HIGH_HUMI_ALARM 8
+#define FAN_STUCK_ALARM 16
+#define ALARM_WARNING 128
+unsigned long alarm_timer = 0;
+
 //RTC device
 RTC_DS1307 rtc;
+
+//fans
+#define FAN_OUT_PWM 6
+#define FAN_OUT_CHECK 7
+
+#define FAN_IN_PWM 9
+#define FAN_IN_CHECK 8
 
 
 //SD logger
@@ -82,15 +105,22 @@ void setup()
 	//if (! rtc.isrunning()) rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 	
 	//setting up DHT
-	/*
-	dht_sensors[0] = &dht1;
-	dht_sensors[1] = &dht2;
-	dht_sensors[2] = &dht3;
-	*/
-	
 	dht1.begin();
 	dht2.begin();
 	dht3.begin();
+	
+	//setting up the pad relay
+	pinMode(TH_PIN, OUTPUT);
+	
+	//setting up the fans
+	pinMode(FAN_OUT_CHECK, INPUT);
+	pinMode(FAN_OUT_PWM, OUTPUT);
+	analogWrite(FAN_OUT_PWM, 255);
+	
+	pinMode(FAN_IN_CHECK, INPUT);
+	pinMode(FAN_IN_PWM, OUTPUT);
+	analogWrite(FAN_IN_PWM, 255);
+	
 	
 	//setting up the SD card reader
 	pinMode(CS_PIN, OUTPUT);
@@ -98,7 +128,7 @@ void setup()
 	DateTime now = rtc.now();
 	memset(file_path, '\0', MAX_FILENAME);
 	memset(row_buffer, '\0', MAX_ROW_LENGTH);
-	if (!logger.exists("logs") logger.mkdir("logs");
+	if (!logger.exists("logs")) logger.mkdir("logs");
 	sprintf(file_path, "/logs/%02d%02d%d", now.year(), now.month(), now.day());
 	if (!logger.exists(file_path)) logger.mkdir(file_path);
 	sprintf(file_path, "/logs/%02d%02d%d/%02d%02%02.log", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
@@ -126,8 +156,17 @@ void loop()
 	}
 	
 	//fix values
-	
-	
+	if (temp_avg <= TEMP_THR_LOW) 
+	{
+		digitalWrite(TH_PIN, HIGH);
+		alarm_flags |= ALARM_WARNING;
+	}
+	else if (temp_avg >= TEMP_THR_HI) 
+	{
+		digitalWrite(TH_PIN, LOW);
+		alarm_flags |= ALARM_WARNING;
+	}
+		
 	//get inputs
 	input_value = analogRead(A0);
 	switch(input_value)
@@ -155,6 +194,7 @@ void loop()
 			break;
 		case RESET_VALUE:
 			pressed_button = RESET_BUTTON;
+			alarm_flags = ALARM_REST;
 			break;
 		default:
 			pressed_button = ERROR;
