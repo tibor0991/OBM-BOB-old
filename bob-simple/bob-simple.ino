@@ -44,6 +44,7 @@ byte alarm_flags = 0;
 #define FAN_STUCK_ALARM 16
 #define ALARM_WARNING 128
 unsigned long alarm_timer = 0;
+#define BUZZER_PIN A1
 
 //RTC device
 RTC_DS1307 rtc;
@@ -54,6 +55,10 @@ RTC_DS1307 rtc;
 
 #define FAN_IN_PWM 9
 #define FAN_IN_CHECK 8
+
+byte fan_out_speed = 255;
+byte fan_in_speed = 255;
+
 
 
 //SD logger
@@ -90,7 +95,7 @@ byte pressed_button = 0;
 
 //display
 bool data_changed = false;
-enum DisplayState {IDLE, MENU, DATE_SETUP};
+enum DisplayState {IDLE, MENU, DATE_SETUP, WARNING};
 DisplayState d_state = IDLE;
 
 void setup()
@@ -115,12 +120,14 @@ void setup()
 	//setting up the fans
 	pinMode(FAN_OUT_CHECK, INPUT);
 	pinMode(FAN_OUT_PWM, OUTPUT);
-	analogWrite(FAN_OUT_PWM, 255);
+	analogWrite(FAN_OUT_PWM, fan_out_speed);
 	
 	pinMode(FAN_IN_CHECK, INPUT);
 	pinMode(FAN_IN_PWM, OUTPUT);
-	analogWrite(FAN_IN_PWM, 255);
+	analogWrite(FAN_IN_PWM, fan_in_speed);
 	
+	//setting up the buzzer pin
+	pinMode(A1, OUTPUT);
 	
 	//setting up the SD card reader
 	pinMode(CS_PIN, OUTPUT);
@@ -155,17 +162,44 @@ void loop()
 		data_changed = true;
 	}
 	
+	
+	//alarms
+	if (alarm_flags != ALARM_REST && millis() > alarm_timer)  //the warning is still on after 5 seconds
+	{
+		//turn on the buzzer
+		digitalWrite(BUZZER_PIN, HIGH);
+		alarm_timer += 5000;
+		d_state = WARNING;
+		//emergency display purge
+		Serial.write(12);
+		Serial.write(128);
+				    //01234567890123456789
+		Serial.print(" WARNING == WARNING ");
+	} 
+	else if (alarm_flags == ALARM_REST )
+	{
+		//turn off the alarm
+		digitalWrite(BUZZER_PIN, LOW);
+	}
+	
+	
+	
+	
 	//fix values
 	if (temp_avg <= TEMP_THR_LOW) 
 	{
 		digitalWrite(TH_PIN, HIGH);
 		alarm_flags |= ALARM_WARNING;
+		
 	}
 	else if (temp_avg >= TEMP_THR_HI) 
 	{
 		digitalWrite(TH_PIN, LOW);
 		alarm_flags |= ALARM_WARNING;
 	}
+	
+	if (alarm_flags != ALARM_REST) 
+		alarm_timer = millis() + 5000;
 		
 	//get inputs
 	input_value = analogRead(A0);
@@ -194,14 +228,11 @@ void loop()
 			break;
 		case RESET_VALUE:
 			pressed_button = RESET_BUTTON;
-			alarm_flags = ALARM_REST;
 			break;
 		default:
 			pressed_button = ERROR;
 			break;
 	}
-	
-	
 	
 	//display
 	
@@ -213,60 +244,23 @@ void loop()
 				char display_line[20];
 				Serial.write(128);
 				DateTime now = rtc.now();
-				/*
-				//Serial.write(12); //clears the screen
-				//	                       1111111111
-				//				 01234567890123456789
-				//print the date
-				
-				if (now.day() < 10) Serial.print(0, DEC);
-				Serial.print(now.day(), DEC);
-				Serial.print("/");
-				if (now.month() < 10) Serial.print(0, DEC);
-				Serial.print(now.month(), DEC);
-				Serial.print("/");
-				Serial.print(now.year(), DEC);
-				
-				Serial.print(" ");
-				
-				//print the time
-				if (now.hour() < 10) Serial.print(0, DEC);
-				Serial.print(now.hour(), DEC);
-				Serial.print(":");
-				if (now.minute() < 10) Serial.print(0, DEC);
-				Serial.print(now.minute(), DEC);
-				Serial.print(":");
-				if (now.second() < 10) Serial.print(0, DEC);
-				Serial.print(now.second(), DEC);*/
+
 				memset(display_line, '\0', 20);
 				sprintf(display_line, "%02d/%02d/%d %02d:%02d:%02d\n", now.day(), now.month(), now.year(), now.hour(), now.minute(), now.second());
 				Serial.print(display_line);
 				
 				if (data_changed)
 				{
-					Serial.write(148);/*
-					//	                    1111111111
-					//			  01234567890123456789
-					//            Temperature: ##.# °C
-					Serial.print(F("Temperature:"));
-					Serial.print(temp_avg, DEC);
-					 Serial.print(" C");
-					*/
+					//prints temperature
+					Serial.write(148);
 					memset(display_line, '\0', 20);
 					sprintf(display_line, "Temperature:%02.2f C\n", temp_avg);
-					
-					//prints the humidity
-					Serial.write(168);/*
-					//	                    1111111111
-					//			  01234567890123456789
-					//            Humidity: ##.#%
-					Serial.print(F("Humidity:"));
-					Serial.print(hum_avg, DEC);
-					Serial.print("%");
-					*/
+					Serial.print(display_line);
+					//prints humidity
+					Serial.write(168);
 					memset(display_line, '\0', 20);
 					sprintf(display_line, "Humidity:%02.2f C\n", hum_avg);
-					
+					Serial.print(display_line);
 					
 					data_changed = false;
 				}
@@ -282,6 +276,14 @@ void loop()
 				default:
 					Serial.println("There will be a menu");
 					break;
+			}
+			break;
+		case WARNING:
+			//DUMMY STATE
+			if (pressed_button == RESET_BUTTON)
+			{
+				d_state = IDLE;
+				alarm_flags = ALARM_REST;
 			}
 			break;
 	}
