@@ -45,6 +45,7 @@ byte alarm_flags = 0;
 #define ALARM_WARNING 128
 unsigned long alarm_timer = 0;
 #define BUZZER_PIN A1
+#define BUZZER_TONE 880 //A5
 
 //RTC device
 RTC_DS1307 rtc;
@@ -167,7 +168,8 @@ void loop()
 	if (alarm_flags != ALARM_REST && millis() > alarm_timer)  //the warning is still on after 5 seconds
 	{
 		//turn on the buzzer
-		digitalWrite(BUZZER_PIN, HIGH);
+		//digitalWrite(BUZZER_PIN, HIGH);
+		tone(BUZZER_PIN, BUZZER_TONE);
 		alarm_timer += 5000;
 		d_state = WARNING;
 		//emergency display purge
@@ -179,7 +181,8 @@ void loop()
 	else if (alarm_flags == ALARM_REST )
 	{
 		//turn off the alarm
-		digitalWrite(BUZZER_PIN, LOW);
+		//digitalWrite(BUZZER_PIN, LOW);
+		noTone(BUZZER_TONE);
 	}
 	
 	
