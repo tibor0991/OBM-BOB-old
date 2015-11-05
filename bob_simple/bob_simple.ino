@@ -6,6 +6,9 @@
 #include <SdFat.h>
 #include <string.h>
 
+#include "InputHandler.h"
+
+
 /**
 Single-file firmware for the OBM-BOB
 
@@ -25,7 +28,7 @@ DHT dht2(DHT2_PIN, DHT_TYPE);
 DHT dht3(DHT3_PIN, DHT_TYPE);
 DHT* dht_sensors[3];
 byte dht_counter = 0;
-float temp_avg = 0, hum_avg = 0;
+float temp_avg = 0.0f, hum_avg = 0.0f;
 unsigned long int sensor_timer = 0;
 #define SENSOR_INTERVAL 5000
 
@@ -90,14 +93,33 @@ byte pressed_button = 0;
 #define LEFT_BUTTON   	0x00000100
 #define UP_BUTTON     	0x00001000
 #define RIGHT_BUTTON  	0x00010000
-#define BACK_BUTTON	 	0x00100000
+#define BACK_BUTTON     0x00100000
 #define RESET_BUTTON  	0x01000000
-#define ERROR			0x11111111
+#define ERROR			0x10000000
 
 //display
 bool data_changed = false;
-enum DisplayState {IDLE, MENU, DATE_SETUP, WARNING};
+enum DisplayState {IDLE, MENU, DATE_SETUP, THR_SETUP, LNG_SETUP, WARNING};
 DisplayState d_state = IDLE;
+#define USE_I2C_DISPLAY	//comment this if you want to use the serial output
+#ifdef USE_I2C_DISPLAY
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
+#else
+#include <LiquidCrystal_Serial.h>
+LiquidCrystal_Serial lcd;
+#endif
+
+//menu
+byte menu_index = 1;
+
+
+//main functions
+void readSensors();
+void fixValues();
+void acquireInput();
+void showMenu();
+void logData();
 
 void setup()
 {
@@ -108,7 +130,7 @@ void setup()
 	
 	//setting up the RTC
 	rtc.begin();
-	//if (! rtc.isrunning()) rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+	if (! rtc.isrunning()) rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 	
 	//setting up DHT
 	dht1.begin();
@@ -143,8 +165,14 @@ void setup()
 	logFile = logger.open(file_path, FILE_WRITE);
 	logFile.close();
 	
-	
-	Serial.write(12); //clear screen
+	//setting up the display
+	lcd.begin(20,4);
+	lcd.home();
+	lcd.print(F("  Open Bio Medical  "));
+    lcd.setCursor(0,1);
+    lcd.print(F("    Baby On Board   "));
+	delay(1000);
+	lcd.clear();
 }
 
 void loop()
@@ -154,10 +182,10 @@ void loop()
 	{
 		//first try: naive average, might take around 750 ms
 		temp_avg = dht1.readTemperature() + dht2.readTemperature() + dht3.readTemperature();
-		temp_avg /= 3;
+		temp_avg /= 3.0f;
 		
 		hum_avg = dht1.readHumidity() + dht2.readHumidity() + dht3.readHumidity();
-		hum_avg /= 3;
+		hum_avg /= 3.0f;;
 		
 		sensor_timer += SENSOR_INTERVAL;
 		data_changed = true;
@@ -172,11 +200,12 @@ void loop()
 		tone(BUZZER_PIN, BUZZER_TONE);
 		alarm_timer += 5000;
 		d_state = WARNING;
-		//emergency display purge
-		Serial.write(12);
-		Serial.write(128);
-				    //01234567890123456789
-		Serial.print(" WARNING == WARNING ");
+		//emergency display purge	
+		#ifdef USE_I2C_DISPLAY
+		lcd.clear();
+		lcd.setCursor(0,1);
+		lcd.print(F(" WARNING == WARNING "));
+		#endif
 	} 
 	else if (alarm_flags == ALARM_REST )
 	{
@@ -206,11 +235,8 @@ void loop()
 		
 	//get inputs
 	input_value = analogRead(A0);
-	switch(input_value)
+	/*switch(input_value)
 	{
-		case REST_VALUE:
-			pressed_button = 0;
-			break;
 		case ENTER_VALUE:
 			pressed_button = ENTER_BUTTON;
 			break;
@@ -235,50 +261,127 @@ void loop()
 		default:
 			pressed_button = ERROR;
 			break;
-	}
-	
+	}*/
+
+        if ( input_value > ENTER_VALUE - 5 && input_value < ENTER_VALUE + 5 ) pressed_button = ENTER_BUTTON;
+        else if ( input_value > DOWN_VALUE - 5 && input_value < DOWN_VALUE + 5 ) pressed_button = DOWN_BUTTON;
+        else if ( input_value > LEFT_VALUE - 5 && input_value < LEFT_VALUE + 5 ) pressed_button = LEFT_BUTTON;
+        else if ( input_value > UP_VALUE - 5 && input_value < UP_VALUE + 5 ) pressed_button = UP_BUTTON;
+        else if ( input_value > RIGHT_VALUE - 5 && input_value < RIGHT_VALUE + 5 ) pressed_button = RIGHT_BUTTON;
+        else if ( input_value > BACK_VALUE - 5 && input_value < BACK_VALUE + 5 ) pressed_button = BACK_BUTTON;
+        else if ( input_value > RESET_VALUE - 5 && input_value < RESET_VALUE + 5 ) pressed_button = RESET_BUTTON;
+        else if ( input_value < RESET_VALUE -5 || input_value > ENTER_VALUE + 5) pressed_button = ERROR;
+
+	delay(350);
+        Serial.print("Input received:");
+        Serial.println(input_value, DEC);
+        Serial.println(pressed_button, DEC);
+        if (pressed_button != ERROR && pressed_button != 0) 
+        {
+          tone(A1, 440);
+          delay(25);
+          noTone(A1);
+        }
 	//display
-	
+	/*
 	switch(d_state)
 	{
 		case IDLE:
 			if (pressed_button != ENTER_BUTTON)
 			{
 				char display_line[20];
-				Serial.write(128);
 				DateTime now = rtc.now();
 
 				memset(display_line, '\0', 20);
-				sprintf(display_line, "%02d/%02d/%d %02d:%02d:%02d\n", now.day(), now.month(), now.year(), now.hour(), now.minute(), now.second());
-				Serial.print(display_line);
+				sprintf(display_line, "%02d/%02d/%d %02d:%02d:%02d", now.day(), now.month(), now.year(), now.hour(), now.minute(), now.second());
+				
+				#ifdef USE_I2C_DISPLAY
+				lcd.setCursor(0,0);
+				lcd.print(display_line);
+				#endif
 				
 				if (data_changed)
 				{
 					//prints temperature
-					Serial.write(148);
 					memset(display_line, '\0', 20);
-					sprintf(display_line, "Temperature:%02.2f C\n", temp_avg);
-					Serial.print(display_line);
+					sprintf(display_line, "Temperature:%02.2f C", temp_avg);
+								
+					#ifdef USE_I2C_DISPLAY
+					lcd.setCursor(0,1);
+					lcd.print(display_line);
+					#endif
+				
 					//prints humidity
-					Serial.write(168);
 					memset(display_line, '\0', 20);
-					sprintf(display_line, "Humidity:%02.2f C\n", hum_avg);
-					Serial.print(display_line);
+					sprintf(display_line, "Humidity:%02.2f C", hum_avg);
+					
+					#ifdef USE_I2C_DISPLAY
+					lcd.setCursor(0,2);
+					lcd.print(display_line);
+					#endif
 					
 					data_changed = false;
 				}
 			}
-			else d_state = MENU;
+			else if (pressed_button == ENTER_BUTTON)
+			{
+				d_state = MENU;
+				#ifdef USE_I2C_DISPLAY
+				lcd.clear();
+				lcd.setCursor(0,0);
+				lcd.print(F("Main menu:"));
+				lcd.setCursor(0,1);
+				lcd.print(F(">Set date"));
+				lcd.setCursor(0,2);
+				lcd.print(F(" Set thresholds"));
+				lcd.setCursor(0,3);
+				lcd.print(F(" Set language"));
+				
+				#endif
+				menu_index = 1;
+				
+				01234567890123456789
+				Main menu:
+				>Set date
+				 Set thresholds
+				 Set language
+				
+			}
 			break;
 		case MENU:
 			switch(pressed_button)
 			{
 				case BACK_BUTTON:
 					d_state = IDLE;
+                                        lcd.clear();
+                                        break;
+				case UP_BUTTON:
+					//moves the index upward
+					if ( menu_index > 1 )
+					{
+						lcd.setCursor(0,menu_index--);
+						lcd.print(" ");
+						lcd.setCursor(0, menu_index);
+						lcd.print(">");
+					}
 					break;
-				default:
-					Serial.println("There will be a menu");
+				case DOWN_BUTTON:
+					//moves the menu index downward
+					if ( menu_index < 3 )
+					{
+						lcd.setCursor(0,menu_index++);
+						lcd.print(" ");
+						lcd.setCursor(0, menu_index);
+						lcd.print(">");
+					}
 					break;
+				case ENTER_BUTTON:
+					if (menu_index == 1) d_state = DATE_SETUP;
+					else if (menu_index == 2) d_state = THR_SETUP;
+					else if (menu_index == 3) d_state = LNG_SETUP;
+                                        lcd.clear();
+					break;
+
 			}
 			break;
 		case WARNING:
@@ -287,10 +390,23 @@ void loop()
 			{
 				d_state = IDLE;
 				alarm_flags = ALARM_REST;
+                                lcd.clear();
 			}
 			break;
+		default:
+			#ifdef USE_I2C_DISPLAY
+			lcd.clear();
+			lcd.home();
+			lcd.print(F("Unimplemented state"));
+			lcd.setCursor(0,2);
+			lcd.print(F("Sorry :^)"));
+			delay(1500);
+			d_state = IDLE;
+                        lcd.clear();
+			#endif
+			break;
 	}
-
+        */
 	//logging
 	if (millis() > logger_timer)
 	{
