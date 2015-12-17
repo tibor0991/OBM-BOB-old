@@ -26,6 +26,7 @@ class LiquidCrystal_Serial : public Print
 		void clear();
 		void home();
 		void setCursor(int x, int y);
+		void createChar(uint8_t, uint8_t[]);
 
 	public: 
 		virtual void write(uint8_t);	//reimplemented function from Print.h
@@ -62,4 +63,9 @@ void LiquidCrystal_Serial::setCursor(int x, int y);
 void LiquidCrystal_Serial::write(uint8_t c)
 {
 	Seria.write(c);
+}
+
+void LiquidCrystal::createChar(uint8_t, uint8_t[])
+{
+	//dummy function, actually does nothing
 }
